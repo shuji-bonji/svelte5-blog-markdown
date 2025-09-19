@@ -1,10 +1,14 @@
 <script lang="ts">
   import { articles, getFeaturedArticles } from '$lib/data/articles';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
-  import { base } from '$app/paths';
-  
-  const featuredArticles = getFeaturedArticles();
-  const recentArticles = articles.slice(0, 3);
+  import { resolve } from '$app/paths';
+
+  // Svelte 5の$derivedを使用
+  const featuredArticles = $derived(getFeaturedArticles());
+  const recentArticles = $derived(articles.slice(0, 3));
+
+  // resolveを使用してURLを解決
+  const blogUrl = resolve('/blog');
 </script>
 
 <svelte:head>
@@ -57,7 +61,7 @@
       {/each}
     </div>
     <div class="more">
-      <a href="{base}/blog" class="button">
+      <a href={blogUrl} class="button">
         すべての記事を見る →
       </a>
     </div>

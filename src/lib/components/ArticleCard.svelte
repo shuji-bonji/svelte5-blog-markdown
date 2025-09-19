@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { Article } from '$lib/types/blog';
-  import { base } from '$app/paths';
-  
+  import { resolve } from '$app/paths';
+
   let { article }: { article: Article } = $props();
-  
+
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString('ja-JP', {
@@ -12,10 +12,13 @@
       day: 'numeric'
     });
   }
+
+  // resolveを使用して記事URLを解決
+  const articleUrl = $derived(resolve(`/blog/${article.slug}`));
 </script>
 
 <article class="card">
-  <a href="{base}/blog/{article.slug}" class="card-link">
+  <a href={articleUrl} class="card-link">
     {#if article.frontmatter.featured}
       <span class="featured-badge">Featured</span>
     {/if}
