@@ -1,6 +1,6 @@
 <script lang="ts">
   import '../app.css';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
   import type { Snippet } from 'svelte';
   
   let { children }: { children?: Snippet } = $props();
@@ -9,13 +9,13 @@
 <div class="app">
   <header class="header">
     <nav class="nav container">
-      <a href="{base}/" class="logo">
+      <a href={resolve('/')} class="logo">
         <span class="gradient-text">Markdown Blog</span>
       </a>
       <ul class="nav-menu">
-        <li><a href="{base}/">ホーム</a></li>
-        <li><a href="{base}/blog">ブログ</a></li>
-        <li><a href="{base}/about">About</a></li>
+        <li><a href={resolve('/')}>ホーム</a></li>
+        <li><a href={resolve('/blog')}>ブログ</a></li>
+        <li><a href={resolve('/about')}>About</a></li>
       </ul>
     </nav>
   </header>

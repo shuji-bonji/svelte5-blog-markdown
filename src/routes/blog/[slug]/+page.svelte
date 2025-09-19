@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { base } from '$app/paths';
+  import { resolve } from '$app/paths';
   import { page } from '$app/stores';
   import { getRelatedArticles } from '$lib/data/articles';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
@@ -46,7 +46,7 @@
     
     <div class="tags">
       {#each data.article.frontmatter.tags as tag}
-        <a href="{base}/blog?tag={encodeURIComponent(tag)}" class="tag">
+        <a href="{resolve('/blog')}?tag={encodeURIComponent(tag)}" class="tag">
           {tag}
         </a>
       {/each}
@@ -81,7 +81,7 @@
     </div>
     
     <nav class="article-nav">
-      <a href="{base}/blog" class="back-link">
+      <a href={resolve('/blog')} class="back-link">
         ← ブログ一覧に戻る
       </a>
     </nav>
