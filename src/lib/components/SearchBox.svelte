@@ -1,16 +1,14 @@
 <script lang="ts">
-  import type { Article } from '$lib/types/blog';
-  
-  let { 
+  let {
     onSearch,
     placeholder = '記事を検索...'
   }: {
     onSearch: (query: string) => void;
     placeholder?: string;
   } = $props();
-  
+
   let query = $state('');
-  let debounceTimer: NodeJS.Timeout;
+  let debounceTimer: ReturnType<typeof setTimeout>;
   
   function handleInput() {
     clearTimeout(debounceTimer);

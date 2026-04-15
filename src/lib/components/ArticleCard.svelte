@@ -13,8 +13,8 @@
     });
   }
 
-  // resolveを使用して記事URLを解決
-  const articleUrl = $derived(resolve(`/blog/${article.slug}`));
+  // SvelteKit 2 の型付きルーティング：ルートパターンとパラメータを別々に渡す
+  const articleUrl = $derived(resolve('/blog/[slug]', { slug: article.slug }));
 </script>
 
 <article class="card">

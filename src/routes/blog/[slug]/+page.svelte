@@ -1,13 +1,14 @@
 <script lang="ts">
-  import type { PageData } from './$types';
+  import type { PageProps } from './$types';
   import { resolve } from '$app/paths';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { getRelatedArticles } from '$lib/data/articles';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
-  
-  let { data }: { data: PageData } = $props();
-  
-  const relatedArticles = getRelatedArticles(data.article, 2);
+
+  let { data }: PageProps = $props();
+
+  // data.article はリアクティブなので、$derived でラップして再評価させる
+  const relatedArticles = $derived(getRelatedArticles(data.article, 2));
   
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -62,7 +63,7 @@
       <h3>この記事をシェア</h3>
       <div class="share-buttons">
         <a 
-          href="https://twitter.com/intent/tweet?text={encodeURIComponent(data.article.frontmatter.title)}&url={encodeURIComponent($page.url.href)}"
+          href="https://twitter.com/intent/tweet?text={encodeURIComponent(data.article.frontmatter.title)}&url={encodeURIComponent(page.url.href)}"
           target="_blank"
           rel="noopener"
           class="share-button twitter"
@@ -70,7 +71,7 @@
           Twitter
         </a>
         <a 
-          href="https://www.facebook.com/sharer/sharer.php?u={encodeURIComponent($page.url.href)}"
+          href="https://www.facebook.com/sharer/sharer.php?u={encodeURIComponent(page.url.href)}"
           target="_blank"
           rel="noopener"
           class="share-button facebook"

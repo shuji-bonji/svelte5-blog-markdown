@@ -1,10 +1,11 @@
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import fm from 'front-matter';
+import type Prism from 'prismjs';
 import type { Article, ArticleFrontmatter } from '$lib/types/blog';
 
 // Prism.jsを動的にインポート（クライアントサイドのみ）
-let Prism: any;
+let prism: typeof Prism | undefined;
 if (typeof window !== 'undefined') {
   Promise.all([
     import('prismjs'),
@@ -20,7 +21,7 @@ if (typeof window !== 'undefined') {
     import('prismjs/components/prism-yaml'),
     import('prismjs/components/prism-sql')
   ]).then(([prismModule]) => {
-    Prism = prismModule.default;
+    prism = prismModule.default;
   });
 }
 
@@ -29,8 +30,8 @@ marked.use(
   markedHighlight({
     langPrefix: 'language-',
     highlight(code, lang) {
-      if (Prism && Prism.languages[lang]) {
-        return Prism.highlight(code, Prism.languages[lang], lang);
+      if (prism && prism.languages[lang]) {
+        return prism.highlight(code, prism.languages[lang], lang);
       }
       return code;
     }
@@ -42,7 +43,7 @@ function calculateReadingTime(text: string) {
   const wordsPerMinute = 200;
   const wordCount = text.trim().split(/\s+/).length;
   const minutes = Math.ceil(wordCount / wordsPerMinute);
-  
+
   return {
     text: `${minutes}分で読めます`,
     minutes,
@@ -51,10 +52,38 @@ function calculateReadingTime(text: string) {
   };
 }
 
+/**
+ * 本文先頭の「# タイトル」行が frontmatter の title と一致する場合に除去する。
+ * これにより、ページ側の <h1> と本文冒頭の h1 の二重表示を防ぐ。
+ * Markdown の執筆時は # を書いても書かなくても同じ結果になる。
+ */
+function stripLeadingH1(body: string, title: string): string {
+  const lines = body.split('\n');
+  // 先頭の空行をスキップ
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === '') i++;
+
+  const firstLine = lines[i];
+  if (!firstLine) return body;
+
+  // ATX 形式の h1 (# ...) にマッチ。h2 以降 (##) は除外。
+  const match = firstLine.match(/^#\s+(.+?)\s*#*\s*$/);
+  if (!match) return body;
+
+  if (match[1].trim() === title.trim()) {
+    // # タイトル行とその直後の空行を除去
+    return lines.slice(i + 1).join('\n').replace(/^\n+/, '');
+  }
+  return body;
+}
+
 export function parseMarkdown(slug: string, markdown: string): Article {
   const { attributes, body } = fm<ArticleFrontmatter>(markdown);
-  const html = marked(body);
-  const stats = calculateReadingTime(body);
+  // frontmatter に title がある場合、本文冒頭の重複 h1 を除去する
+  const normalizedBody = stripLeadingH1(body, attributes.title);
+  // marked v16: async オプションを明示して string を返すオーバーロードを選択する
+  const html = marked.parse(normalizedBody, { async: false });
+  const stats = calculateReadingTime(normalizedBody);
   
   return {
     slug,
